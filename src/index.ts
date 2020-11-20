@@ -1,7 +1,7 @@
 //Interface
 /*typescript のコア原則の1つとして、型チェックが値の形状に焦点を当てること
 //これは、「ダッグタイピング」or「構造サブタイピング」と呼ばれることもある
-interfaceはコード内、プロジェクト外のコードの取り決めを定義する協力な方法*/
+interfaceはコード内、プロジェクト外のコードの取り決めを定義する強力な方法*/
 
 //-----------------簡単な例-----------------
 //コンパイラは必要なもの,typeがあるか存在するかを確認する（今回の場合label）
@@ -108,8 +108,8 @@ function createTriangle(
     area: config.width ? (config.width * config.width) / 2 : 20,
   };
 }
-// let myTriangle = createTriangle({ colour: "red", width: 100 });
 /*オブジェクトリテラルに「ターゲットタイプ」にないプロパティがある場合、エラーが発生します。今回の場合colourというオブジェクトリテラルがTriangleConfigに存在しない*/
+// let myTriangle = createTriangle({ colour: "red", width: 100 });
 
 /*type assertionを使用することで、上記のエラーを回避することができる*/
 let myTriangle2 = createTriangle({
@@ -133,6 +133,47 @@ let triangleOptions = { colour: "red", width: 100 };
 let myTriangle3 = createTriangle(triangleOptions);
 
 /*上記の場合、triangleOptionsとtriangleConfigに共通のプロパティ（今回の場合width）
-が存在すれば、機能する。しかしcolourのみだとerrorになる */
+が存在すれば、機能する。従って、colourのみだとerrorになる */
 
 //-----------------Function Types-----------------
+/*interface でfunction typeを記述するためには、
+呼び出しシグネチャ（関数やメソッドの名前、引数の数やデータ型、返り値の型などの組み合わせのことをシグネチャという）
+を与える。パラメータリストの格パラメータには、名前とtypeの両方が必要になる。
+下記、例 */
+
+interface SearchFunc {
+  (source: string, subString: string): boolean;
+}
+/*上記のように定義すると、他のinterfaceと同じように、このfunction typeを使用でき。
+下記では、function typeを作成し、それに同じ型の関数値を割り当てる方法を示している*/
+let mySearch: SearchFunc;
+mySearch = function (source: string, subString: string) {
+  let result = source.search(subString);
+  return result > -1;
+};
+console.log(mySearch("jjjaaa", "aaa"));
+
+/* function typeは正しくtype checkを行う（上記の時みたいに過剰に型チェックをしない）
+ため下記のように記述することができる*/
+
+mySearch = function (src: string, sub: string): boolean {
+  let result = src.search(sub);
+  return result > -1;
+};
+
+/* function　パラメーターは一度に1つずつチェックされ、対応するパラメータ位置のtypeが相互にチェックされる
+関数の内容を書くときに引数を指定したくない場合は、interfaceで指定した型が直接割り当てられるため、
+関数の内容を書くところで引数の型を推測する。そのため、下記のように書いてもここではfalse と　trueが返り値となる*/
+let yourSearch: SearchFunc;
+yourSearch = function (src, sub) {
+  let result = src.search(sub);
+  return result > -1;
+};
+/*戻り値にnumberやstringを返した場合、type checkは戻り値がinterfaceで定義したものと一致しないのでエラーを返す */
+let herSearch: SearchFunc;
+// herSearch = function (src, sub) {
+//   let result = src.search(sub);
+//   return 'string';
+// };
+
+//-----------------Indexable Types-----------------
