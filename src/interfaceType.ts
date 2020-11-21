@@ -1,32 +1,34 @@
 //Interface
 /*typescript のコア原則の1つとして、型チェックが値の形状に焦点を当てること
-//これは、「ダッグタイピング」or「構造サブタイピング」と呼ばれることもある
+これは、「ダッグタイピング」or「構造サブタイピング」と呼ばれることもある
 interfaceはコード内、プロジェクト外のコードの取り決めを定義する強力な方法*/
 
 //-----------------簡単な例-----------------
 //コンパイラは必要なもの,typeがあるか存在するかを確認する（今回の場合label）
-function printLabel(labeledObj: { label: string }) {
+function printLabel(labeledObj: { label: string }): void {
   console.log(labeledObj.label);
 }
 
 let myObj = { size: 10, label: "Size 10 Object" };
 printLabel(myObj);
+
 //下記がinterfaceを利用した例
 interface LabeledValue {
   label: string;
 }
 
-function printLabel2(labeledObj: LabeledValue) {
+function printLabel2(labeledObj: LabeledValue): void {
   console.log(labeledObj.label);
 }
 
 let myObj2 = { size: 10, label: "Size 10 Object" };
-printLabel(myObj2);
+printLabel2(myObj2);
 
 //-----------------Optional Properties-----------------
 /*interfaceの全てのプロパティが必要なわけではない。
 特定の条件下で存在するものもあれば、全く存在しないものもある。
-これらのOptionのプロパティは、いくつかのプロパティのみが入力されている関数にオブジェクトを渡す「オブジェクトバッグ」のようなパターンを作成する時に使用される例*/
+これらのOptionのプロパティは、いくつかのプロパティのみが入力されている関数にオブジェクトを渡す
+「オブジェクトバッグ」のようなパターンを作成する時に使用される例*/
 interface SquareConfug {
   color?: string;
   width?: number;
@@ -47,7 +49,8 @@ let mySquare = createSquare({ color: "black" });
 let yourInfo: SquareConfug = { color: "blue", width: 100 };
 let yourSquare = createSquare(yourInfo);
 console.log(mySquare, yourSquare);
-/*optionのプロパティの利点は、interfaceの一部ではないプロパティの使用を防ぎながら、これらの利用可能なプロパティを記述できること（今回の場合colorプロパティ）
+/*optionのプロパティの利点は、interfaceの一部ではないプロパティの使用を防ぎながら、
+これらの利用可能なプロパティを記述できること（今回の場合colorプロパティ）
 under code*/
 
 // function createSquare2(config: SquareConfug): { color: string; area: number } {
@@ -81,7 +84,6 @@ a[1] = 3;
 a.push(5);
 // ro.push(5); //error
 console.log(a, ro);
-
 /*type assertionでオーバーライドすることができる*/
 let b: number[] = [1, 2, 3, 4];
 let ro2: ReadonlyArray<number> = a;
@@ -235,7 +237,7 @@ let yourArray: ReadonlyStringArray = ["Alive", "Bob"];
 
 //-----------------Class Types-----------------
 /* 
-Implementing an interface
+Implementing an interface(implement とはクラスからインターフェースを継承すること)
 C#やJavaのような言語でのinterfaceの最も使用される方法の1つ。
 classが特定のコントラクトを満たすことができ、typescriptでもそれが可能*/
 interface ClockInterface {
@@ -261,7 +263,7 @@ class Clock2 implements ClockInterface2 {
   constructor(h: number, m: number) {}
 }
 /*interfaceはpublic側とprivate側の両方ではなく、classのpublic側を記述する
-このことにより、それらを使用して、classのclass instanceのprivate側の特定typeもあることを確認できなくなる
+このことにより、それらを使用して、classのclass instanceのprivate側の特定typeもあることを確認できない
 
 classのstatic 側とinstanceの違いについて
 
@@ -274,6 +276,7 @@ construct signatureのあるinterfaceを作成し、このinterfaceを実装し�
 // interface ClockConstructor {
 //   new (hour: number, minute: number);
 // }
+
 // class Clock implements ClockConstructor {
 //   currentTime: Date;
 //   constructor(h: number, m: number) { }
@@ -282,19 +285,20 @@ construct signatureのあるinterfaceを作成し、このinterfaceを実装し�
 /*これはclassがinterdfaceを実装した場合、classのinstance側だけがcheckされるため。
 constructorはstatic側であるため、このcheckの対象に含まれない 
 代わりに、classのstatic側に直接それを行う必要がある。
-下記例では、2つのinterfaceをdifineし、ClockConstructorはconstructorのための者で、
-CloclInterfaceはinstance methodのための者になる。
-下記例では、便宜上、渡された型のinstanceを作成するconstructor function createCloclをdefineしている*/
+下記例では、2つのinterfaceをdifineし、ClockConstructorはconstructorのためのもので、
+ClockInterface3はinstance methodのためのものになる。
+下記例では、便宜上、渡された型のinstanceを作成するconstructor function createClockをdefineしている*/
 
-interface CloclConstructor {
+interface ClockConstructor {
   new (hour: number, minute: number): ClockInterface3;
 }
+
 interface ClockInterface3 {
   tick(): void;
 }
 
 function createClock(
-  ctor: CloclConstructor,
+  ctor: ClockConstructor,
   hour: number,
   minute: number
 ): ClockInterface3 {
