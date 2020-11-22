@@ -140,3 +140,86 @@ function buildName4(firstName = "Will", lastName: string) {
 // let result12 = buildName4("Bob", "Adams", "Sr.");
 let result13 = buildName4("Bob", "Adams");
 let result14 = buildName4(undefined, "Adams");
+
+//-------------Rest引数（Rest Parameters）(spread function???)-------------
+/*必須、任意、デフォルトの引数の全てに共通する点は、それらは1つの引数に対して語られるという点 
+時折、複数の引数をグループとして使用したい、また最終的に必要な引数の数が事前にわからない、ということが起こりうる
+javascriptでは、格function内の本文で引数を可視化することで、それを使用することが可能です。
+一方typescriptでは、これらの引数を1つの変数にまとめることで可能となる。*/
+function buildName5(firstName: string, ...restofName: string[]) {
+  return firstName + " " + restofName.join(" ");
+}
+let employeeName = buildName5("Joseph", "Samuel", "Lucas", "Mackinzie");
+/*Rest Parameterは、任意の引数の数を際限りなく取り扱います。 
+Rest引数として引数が渡されると、望む数だけそれを使用することが可能です。
+また、何も渡されなくても問題はない。
+コンパイラは、省略記号（...）の後ろにnameが指定された部分に渡された引数を、
+functionないで使用できる配列として構築する
+spread funtionとの違いは下記
+・Restパラメーターは、任意の数の引数を受け入れる関数を作成するために使用されます。
+・スプレッド構文は、通常多くの引数のリストを必要とする関数に配列を渡すために使用されます。
+*/
+
+function buildName6(firstName: string, ...restOfName: string[]) {
+  return firstName + " " + restOfName.join(" ");
+}
+let buildNameFun: (fname: string, ...rest: string[]) => string = buildName6;
+
+//-------------this-------------
+/*typescriptはいくつかのテクニックを使用してthisの誤用を見つけることを可能にする。*/
+/* -------------this and arrow functions-------------*/
+/* javascriptではthisはfunctionが呼ばれた際に設定されるvariable（変数）である。
+thisは非常に便利だが、functionがexexuteされたcontextについて知っておかなければならないというコストが常にある。
+これは、周知のごとく混乱をきたし、特にfunctionを返す場合、または引数としてfunctionへ渡す場合に顕著に現れる。
+まずは下記例をみてみましょう。*/
+
+// let deck = {
+//   suits: ["hearts", "spades", "clubs", "diamonds"],
+//   cards: Array(52),
+//   createCardPicker: function() {
+//       return function() {
+//           let pickedCard = Math.floor(Math.random() * 52);
+//           let pickedSuit = Math.floor(pickedCard / 13);
+//           return {suit: this.suits[pickedSuit], card: pickedCard % 13};
+//       }
+//   }
+// }
+
+// let cardPicker = deck.createCardPicker();
+// let pickedCard = cardPicker();
+
+// alert("card" + pickedCard.card + " of " + pickedCard.suit);
+
+/*createCardPickerは、functionを返す関数であることに注意してください。
+もしこの例を実行すると、期待すすアラートボックスが表示される代わりに、
+エラーが発生します。これはcreateCardPickerによって作成された関数内で使用される
+thisには、deckオブジェクトではなく、windowオブジェクトが設定されるからである。
+
+cardPickerをそれじしんを呼び出していることが原因です。このような
+非メソッド構文の最上位層での呼び出しには、thisにwindowObjectが使用される。
+
+後で使用されることになる関数が返される前に、それを正しいthisにバインドすることによって、
+これを修正することが可能です。この方法は後でどのように使用されるかに関係なく、
+元のdeckオブジェクトが参照されるようにしてくれる
+
+これを行うためにES6のアロー文法を使用して関数式を下記に示す。
+アロー関数は、関数が実行された場所ではなく、関数が作られた場所でthisを補足する。*/
+let deck = {
+  suits: ["hearts", "spades", "clubs", "diamonds"],
+  cards: Array(52),
+  createCardPicker: function () {
+    // 注意: 下の行がアロー関数になり、即座に'this'を捕捉してくれます
+    return () => {
+      let pickedCard = Math.floor(Math.random() * 52);
+      let pickedSuit = Math.floor(pickedCard / 13);
+      return { suit: this.suits[pickedSuit], card: pickedCard % 13 };
+    };
+  },
+};
+let cardPicker = deck.createCardPicker();
+let pickedCard = cardPicker();
+alert("card: " + pickedCard.card + " of " + pickedCard.suit);
+
+/*さらにTypescriptは--noImplicitThis Flagをコンパイラに渡している場合、
+thisの誤用に対して警告を出す。 
+this.suits[pickedSuit]のthisが、any型であることが指摘されるでしょう*/
